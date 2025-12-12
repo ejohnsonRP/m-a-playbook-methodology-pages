@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>M&A Flow – Static Display</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      font-family: Arial, sans-serif;
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      overflow-x: hidden; /* PREVENT LEFT–RIGHT SCROLLING */
+    }
+
+    /* Overall wrapper */
+    .wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 0;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      margin: 20px 0;
+    }
+
+    /* Bigger logo */
+    .header img {
+      width: 200px;
+      height: auto;
+    }
+
+    /* Unified caption style */
+    .section-caption {
+      font-size: 18px;
+      font-weight: 600;
+      color: #444444;
+      margin: 10px 0 20px 0;
+    }
+
+    /* Sections behave as full “pages” */
+    .section-block {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 20px 0 40px;
+      opacity: 0;
+      transform: translateY(50px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .section-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Top image slightly narrower */
+    .top-image-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Bottom image wider */
+    .bottom-image-wrap {
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative; /* needed for hotspot positioning */
+    }
+
+    /* Reduced white space under image 2 for cleaner centering */
+    .second-section {
+      justify-content: center;
+      padding-bottom: 20px;
+    }
+
+    /* Footer bottom-right */
+    .footer {
+      width: 100%;
+      text-align: right;
+      font-size: 14px;
+      color: #666;
+      padding: 20px 10px 40px 10px;
+      position: relative;
+    }
+
+    /* Hotspot positioned over the blue "Strategic Alternatives" box
+       (percent values may need tiny tweaks, but this is much closer) */
+
+    .strategic-hotspot {
+    position: absolute;
+    top: 43.5%;
+    left: 5%;
+    width: 5.3%;
+    height: 9.5%;
+    cursor: pointer;
+    background: rgba(255, 0, 0, 0.4); /* keep visible for now */
+  }
+
+    /* Simple modal background */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    /* Modal content box – smaller now */
+    .modal-content {
+      background: #fff;
+      padding: 15px;
+      max-width: 600px;   /* smaller than before */
+      width: 70%;
+      border-radius: 4px;
+      position: relative; /* so arrow can attach to it */
+    }
+
+    .modal-content img {
+      width: 100%;
+      height: auto;
+    }
+
+    .modal-close {
+      text-align: right;
+      font-size: 20px;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    /* Arrow “tail” showing popup pointing back toward the source box */
+    .modal-arrow {
+      position: absolute;
+      left: -20px;     /* stick out on the left side */
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-right: 20px solid #ffffff; /* same color as modal background */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrapper">
+
+    <!-- ===== TOP SECTION (Image 1) ===== -->
+    <div class="section-block top-section">
+      <div class="header">
+        <img src="https://raw.githubusercontent.com/ejohnsonRP/html_playbook_site/main/RP%20Logo.png" alt="The Point logo">
+      </div>
+
+      <p class="section-caption">
+        Scroll down to see the respective stages for each phase.
+      </p>
+
+      <div class="top-image-wrap">
+        <img 
+          src="https://raw.githubusercontent.com/ejohnsonRP/html_playbook_site/main/m-a-phases.png"
+          alt="M&A Phase Flow"
+        >
+      </div>
+    </div>
+
+    <!-- ===== SECOND SECTION (Image 2) ===== -->
+    <div class="section-block second-section">
+      <p class="section-caption">
+        Click on a blue box below to open up the associated task page for each stage.
+      </p>
+      
+      <div class="bottom-image-wrap">
+        <img 
+          src="https://raw.githubusercontent.com/ejohnsonRP/html_playbook_site/main/stagesflow.png"
+          alt="Phase Stages Diagram"
+        >
+        <!-- Clickable area over "Strategic Alternatives" -->
+        <div class="strategic-hotspot"
+          style="top: 43.5%; left: 9%; width: 5%; height: 9.5%; background: rgba(255,0,0,0.4);">
+          </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <div class="footer">
+      ©2025 RGP. All Rights Reserved.
+    </div>
+
+  </div> <!-- wrapper -->
+
+  <!-- Popup modal -->
+  <div class="modal" id="strategicModal">
+    <div class="modal-content">
+      <div class="modal-arrow"></div> <!-- little arrow tail -->
+      <div class="modal-close" id="strategicClose">×</div>
+
+      <!-- Popup image (now smaller via CSS above) -->
+      <img src="https://raw.githubusercontent.com/ejohnsonRP/html_playbook_site/main/Stage1010.png"
+           alt="Strategic Alternatives Details">
+    </div>
+  </div>
+
+  <!-- Scroll-triggered animation + modal logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // ===== fade-in sections on scroll =====
+      var sections = document.querySelectorAll('.section-block');
+      if (!sections.length) return;
+
+      sections[0].classList.add('visible');
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.3 });
+
+      sections.forEach(function (section) {
+        observer.observe(section);
+      });
+
+      // ===== modal for Strategic Alternatives =====
+      var hotspot = document.querySelector('.strategic-hotspot');
+      var modal   = document.getElementById('strategicModal');
+      var closeBtn = document.getElementById('strategicClose');
+
+      if (hotspot && modal) {
+        hotspot.addEventListener('click', function () {
+          modal.style.display = 'flex';
+        });
+      }
+
+      if (closeBtn && modal) {
+        closeBtn.addEventListener('click', function () {
+          modal.style.display = 'none';
+        });
+      }
+
+      // close modal when clicking outside the content box
+      if (modal) {
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
